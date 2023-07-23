@@ -1,82 +1,32 @@
-// pre entrega 1 . Prestamos
-// condicional . ciclo . funcion
+// pre entrega 2 . Prestamos
 
-// Constantes de Ingresos
-
-const ingresos1 = 1000;
-const ingresos2 = 3000;
-const ingresos3 = 5000;
-
-// Constantes de cuotas
-
-const cuotas6 = 6;
-const cuotas12 = 12;
-const cuotas36 = 36;
-
-// Selección de Ingresos
-let ingresos = prompt('1- $1,000.00\n2- $3,000.00\n3- $5,000.00\n0- Finalizar');
-let valorIngreso;
-
-switch (ingresos) {
-    case '1':
-        valorIngreso = ingresos1;
-        break;
-    case '2':
-        valorIngreso = ingresos2;
-        break;
-    case '3':
-        valorIngreso = ingresos3;
-        break;
-    case '0':
-// Finalizar 
-    alert('Ha finalizado la selección');
-    break;
-    default:
-    alert('Opción no válida');
-    break;
-}
-
-// Selección de Cuotas
-if (valorIngreso !== undefined) {
-    let cuotas = prompt('1- 6 Cuotas\n2- 12 Cuotas\n3- 36 Cuotas\n0- Finalizar');
-    
-    let numeroCuotas;
-
-    switch (cuotas) {
-        case '1':
-        numeroCuotas = cuotas6;
-        break;
-        case '2':
-        numeroCuotas = cuotas12;
-        break;
-        case '3':
-        numeroCuotas = cuotas36;
-        break;
-    case '0':
-
-// Finalizar 
-        alert('Ha finalizado la selección');
-        break;
-default:
-    alert('Opción no válida');
-    break;
-}
-
-if (numeroCuotas !== undefined) {
-// Cálculo de la cuota
-    calcularCuota(valorIngreso, numeroCuotas);
-    alert('Cada cuota será de $' + total);
+function calcularPrestamo(nombre, edad, sueldo, cuotas) {
+    if (edad > 18) {
+      let montoPrestamo = sueldo * 1.50 // Calcula el monto del préstamo con un 150% de cargo
+        return montoPrestamo;
+    } else {
+      return 0; // El usuario no cumple con la edad mínima requerida para el préstamo
     }
-}
+    }
 
-// Función para calcular la cuota
-function calcularCuota(valorIngreso, numeroCuotas) {
-    total = valorIngreso / numeroCuotas;
-    total += total * 0.06; // Suma del 6% de recargo
-}
+  // Solicitar datos al usuario
+let nombre = prompt('Ingrese su nombre:');
+let edad = parseInt(prompt('Ingrese su edad:'));
+let sueldo = parseFloat(prompt('Ingrese su sueldo mensual:'));
+let cuotas = parseInt(prompt('Ingrese la cantidad de cuotas deseadas (hasta 24):'));
 
-console.log("Cada cuota será de $" + total);
-
-
+  // Validar que la cantidad de cuotas esté dentro del rango permitido (1 a 24)
+if (cuotas < 1 || cuotas > 24) {
+    alert('La cantidad de cuotas debe estar entre 1 y 24.');
+    } 
+    else {
+        let montoPrestamo = calcularPrestamo(nombre, edad, sueldo, cuotas);
+    if (montoPrestamo > 0) {
+        let valorCuota = montoPrestamo / cuotas; // Calcula valor de cuota
+        alert('Estimado ' + nombre + ', su préstamo aprobado es de $' + montoPrestamo.toFixed(2) + '. El mismo se abonará en ' + cuotas + ' cuotas de $' + valorCuota.toFixed(2) + ' cada una.');
+    } else {
+        alert('Lo sentimos, no cumple con la edad mínima requerida para el préstamo.');
+    }
+    }
 
 
