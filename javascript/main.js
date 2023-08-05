@@ -37,7 +37,12 @@ function calcularPrestamo(event) {
   } else {
     mostrarNotificacion('Lo sentimos, no cumple con la edad mínima requerida para el préstamo.', 'error');
   }
+    // Guardar datos en el localStorage
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('edad', edad);
+    localStorage.setItem('sueldo', sueldo);
 }
+
 
 function mostrarNotificacion(mensaje, tipo) {
   let notificacion = document.getElementById('notificacion');
@@ -56,4 +61,18 @@ function mostrarNotificacion(mensaje, tipo) {
     notificacion.style.display = 'none';
   }, 8000);
 }
+
+// Cargar datos del localStorage al cargar la página
+document.addEventListener('DOMContentLoaded', function () {
+  let nombre = localStorage.getItem('nombre');
+  let edad = localStorage.getItem('edad');
+  let sueldo = localStorage.getItem('sueldo');
+
+  if (nombre) document.getElementById('nombre').value = nombre;
+  if (edad) document.getElementById('edad').value = edad;
+  if (sueldo) document.getElementById('sueldo').value = sueldo;
+});
+
+
+
 
