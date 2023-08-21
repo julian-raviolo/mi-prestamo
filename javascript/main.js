@@ -1,78 +1,132 @@
-// pre entrega 3 . Prestamos
+// Gestionar el historial
+const HistorialManager = {
+  guardarHistorial(historial) {
+    localStorage.setItem('historial', JSON.stringify(historial));
+  },
+  
+  obtenerHistorial() {
+    return JSON.parse(localStorage.getItem('historial')) || [];
+  },
+
+  agregarRegistro(registro) {
+    let historial = this.obtenerHistorial();
+    historial.push(registro);
+    this.guardarHistorial(historial);
+  },
+
+  mostrarHistorialEnModal() {
+    let historial = this.obtenerHistorial();
+    let historialBodyModal = document.getElementById('historial-body-modal');
+    historialBodyModal.innerHTML = ''; 
+  
+    let rows = historial.map(function (registro) {
+      let fecha = new Date(registro.fecha); 
+      return `
+        <tr>
+          <td>${fecha.toLocaleDateString()}</td>
+          <td>${registro.nombre}</td>
+          <td>$${registro.montoPrestamo.toFixed(2)}</td>
+          <td>${registro.cuotas}</td>
+          <td>${registro.estado}</td>
+        </tr>
+      `;
+    });
+  
+    historialBodyModal.innerHTML = rows.join('');
+  }
+};
+
+// Lista de cédulas no permitidas
+const cedulasNoPermitidas = ['0000000', '1234567', '46245725'];
+
+// Función para verificar si una cédula no está permitida
+function cedulaNoPermitida(cedula) {
+  return cedulasNoPermitidas.includes(cedula);
+}
 
 // Función para calcular el préstamo
 function calcularPrestamo(event) {
-  event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+  event.preventDefault();
 
-// Obtener valores de los campos del formulario
+  // Obtener valores de los campos del formulario y realizar cálculos
   let nombre = document.getElementById('nombre').value;
-  let edad = parseInt(document.getElementById('edad').value);
   let sueldo = parseFloat(document.getElementById('sueldo').value);
   let cuotas = parseInt(document.getElementById('cuotas').value);
+  let cedula = document.getElementById('cedula').value;
+  let edad = parseInt(document.getElementById('edad').value); // Captura la edad desde el formulario
+
+  // Calcular el montoPrestamo
+  let montoPrestamo = calcularMontoPrestamo(sueldo);
+
+  // Agregar el registro al historial
+  HistorialManager.agregarRegistro({
+    fecha: new Date(),
+    nombre: nombre,
+    montoPrestamo: montoPrestamo,
+    cuotas: cuotas,
+    estado: 'Aprobado'
+  });  
+
+  // Verificar si la cédula no está permitida
+  if (cedulaNoPermitida(cedula)) {
+    mostrarNotificacion('No puede usar el sistema porque ya cuenta con un préstamo.', 'error');
+    return; 
+  }
 
   // Validar que la cantidad de cuotas esté dentro del rango permitido (1 a 30)
   if (cuotas < 1 || cuotas > 30) {
     mostrarNotificacion('La cantidad de cuotas debe estar entre 1 y 30.', 'error');
-    return; // Salir de la función si la cantidad de cuotas es inválida
+    return; 
   }
 
-// Función para calcular el préstamo
-  function calcularPrestamo(nombre, edad, sueldo, cuotas) {
-    if (edad > 18) {
-      let montoPrestamo = sueldo * 1.50; // Calcula el monto del préstamo con un 150% de cargo
-      return montoPrestamo;
-    } else {
-      return 0; // El usuario no cumple con la edad mínima requerida para el préstamo
-    }
+  // Verificar los ingresos mínimos según la cantidad de cuotas
+  let ingresosMinimos = cuotas <= 15 ? 20000 : 50000;
+  if (sueldo < ingresosMinimos) {
+    mostrarNotificacion(`Los ingresos mínimos para ${cuotas} cuotas son de $${ingresosMinimos.toFixed(2)}.`, 'error');
+    return; 
   }
 
-  let montoPrestamo = calcularPrestamo(nombre, edad, sueldo, cuotas);
+  // Notificación de préstamo aprobado
+  let valorCuota = montoPrestamo / cuotas; 
+  mostrarNotificacion(
+    `Estimado ${nombre}, su préstamo aprobado es de $${montoPrestamo.toFixed(2)}. El mismo se abonará en ${cuotas} cuotas de $${valorCuota.toFixed(2)} cada una.`,
+    'success'
+  );
 
-  if (montoPrestamo > 0) {
-    let valorCuota = montoPrestamo / cuotas; // Calcula valor de cuota
-    mostrarNotificacion(
-      `Estimado ${nombre}, su préstamo aprobado es de $${montoPrestamo.toFixed(2)}. El mismo se abonará en ${cuotas} cuotas de $${valorCuota.toFixed(2)} cada una.`,
-      'success'
-    );
-  } else {
-    mostrarNotificacion('Lo sentimos, no cumple con la edad mínima requerida para el préstamo.', 'error');
-  }
-    // Guardar datos en el localStorage
-    localStorage.setItem('nombre', nombre);
-    localStorage.setItem('edad', edad);
-    localStorage.setItem('sueldo', sueldo);
+  // Guardar datos en el localStorage
+  localStorage.setItem('nombre', nombre);
+  localStorage.setItem('edad', edad);
+  localStorage.setItem('sueldo', sueldo);
+  localStorage.setItem('cedula', cedula);
 }
 
+// Función para calcular el monto del préstamo
+function calcularMontoPrestamo(sueldo) {
+  return sueldo * 0.50; // Calcula el monto del préstamo con un 50% de cargo
+}
 
+// Notificaciones
 function mostrarNotificacion(mensaje, tipo) {
-  let notificacion = document.getElementById('notificacion');
-  notificacion.textContent = mensaje;
+  const swal = Swal.mixin({
+    toast: true,
+    position: 'center',
+    showConfirmButton: false,
+    timer: 8000,
+    timerProgressBar: true,
+    background: tipo === 'success' ? 'green' : 'red',
+    customClass: {
+      popup: 'alert-text',
+      container: 'alert-box',
+    }
+  });
 
-  if (tipo === 'success') {
-    notificacion.style.backgroundColor = 'green';
-  } else if (tipo === 'error') {
-    notificacion.style.backgroundColor = 'red';
-  }
-
-  notificacion.style.display = 'block';
-
-  // Ocultar la notificación después de 8 segundos
-  setTimeout(function () {
-    notificacion.style.display = 'none';
-  }, 8000);
+  swal.fire({
+    icon: tipo,
+    title: mensaje,
+  });
 }
 
-// Cargar datos del localStorage al cargar la página
+// Mostrar el historial 
 document.addEventListener('DOMContentLoaded', function () {
-  let nombre = localStorage.getItem('nombre');
-  let edad = localStorage.getItem('edad');
-  let sueldo = localStorage.getItem('sueldo');
-
-  if (nombre) document.getElementById('nombre').value = nombre;
-  if (edad) document.getElementById('edad').value = edad;
-  if (sueldo) document.getElementById('sueldo').value = sueldo;
+  HistorialManager.mostrarHistorialEnModal();
 });
-
-
-
-

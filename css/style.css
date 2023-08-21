@@ -1,1 +1,10 @@
+.alert-text {
+    color: white !important;
+    font-size: large;
+    }
+
+.alert-box {
+    width: 600px !important; 
+    padding: 100px !important;
+    }
 
